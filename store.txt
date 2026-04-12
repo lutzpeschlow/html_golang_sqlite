@@ -1,0 +1,75 @@
+Perfekt! Jetzt erkläre ich dir Schritt für Schritt, was in deinem Go-Programm passiert:
+
+Programm-Ablauf (Zeitstrahl)
+text
+1. go run main.go
+2. ↓ main() startet
+3. ↓ Templates laden
+4. ↓ Routes registrieren
+5. ↓ Server blockiert (lauscht Ewig)
+6. ↓ Browser Goroutine nach 3s
+7. ↓ Vivaldi öffnet → Request!
+1. START: main()
+go
+tpl := template.Must(template.ParseFiles("templates/index.html"))
+Lädt templates/index.html → Go-Template-Objekt im RAM.
+
+2. ROUTES registrieren
+text
+http.HandleFunc("/", ...)        ← GET / → Formular anzeigen
+http.HandleFunc("/calculate", ...) ← POST /calculate → Zahlen verarbeiten
+3. SERVER blockiert (ListenAndServe)
+text
+http.ListenAndServe(":8080", nil)
+Go wartet EWIIG auf HTTP-Requests auf Port 8080. Programm läuft!
+
+4. BROWSER-GOROUTINE (nach 3s)
+go
+go func() {
+    time.Sleep(3 * time.Second)
+    exec.Command("vivaldi-stable", "http://localhost:8080").Start()
+}()
+Parallel: Vivaldi öffnet → GET / Request!
+
+5. USER KLICKT "Berechnen"
+text
+<form method="POST" action="/calculate">
+Browser sendet: POST /calculate mit num1=42&num2=7
+
+6. POST /calculate Handler
+text
+1. r.FormValue("num1") → "42"
+2. strconv.Atoi("42") → 42 (int)
+3. processIntegers(42, 7) → "Ergebnisse...\n"
+4. tpl.Execute() → HTML mit {{.Result}} gefüllt
+5. Browser zeigt Ergebnis
+Datenfluss (Grafik)
+text
+[Browser] POST /calculate (num1=42, num2=7)
+       ↓
+[Go Server] r.FormValue() → strconv.Atoi()
+       ↓
+[processIntegers()] → "42+7=49..."
+       ↓  
+[Template] {{.Num1}} {{.Result}} → HTML
+       ↓
+[Browser] Ergebnis anzeigen
+Template-Magie ({{}})
+xml
+<!-- Eingaben bleiben gefüllt! -->
+<input name="num1" value="{{.Num1}}">  <!-- 42 bleibt! -->
+<div>{{.Result}}</div>                 <!-- "42+7=49..." -->
+Warum das genial ist:
+text
+✅ 1 Datei (main.go)
+✅ 1 HTML (index.html) 
+✅ 0 Dependencies
+✅ Auto-Browser-Start
+✅ Form + Ergebnis 1 Seite
+✅ Inline-Funktionen (kein Durcheinander)
+Runtime:
+text
+Programm startet → wartet EWIIG
+Jeder Request → neues HTML generiert
+Strg+C → Server stoppt
+Zusammengefasst: Template → Routes → Handler → Funktion → Template = vollständige Web-App mit 15 Zeilen Kernlogik! 
