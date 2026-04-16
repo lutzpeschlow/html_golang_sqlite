@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"net/http"
 	"os/exec"
+	"runtime"
 	"strconv"
 	"time"
 )
@@ -17,12 +18,10 @@ type Data struct {
 }
 
 func main() {
-	// Template laden
 	tpl := template.Must(template.ParseFiles("templates/index.html"))
 
-	// Routes direkt registrieren (KEINE HandlerFunc-Wrapper)
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		tpl.Execute(w, Data{})
+		_ = tpl.Execute(w, Data{})
 	})
 
 	http.HandleFunc("/calculate", func(w http.ResponseWriter, r *http.Request) {
@@ -36,34 +35,45 @@ func main() {
 
 		num1, err := strconv.Atoi(num1Str)
 		if err != nil {
-			tpl.Execute(w, Data{Error: "Erste Zahl ungültig!"})
+			_ = tpl.Execute(w, Data{Error: "Erste Zahl ungültig!"})
 			return
 		}
 
 		num2, err := strconv.Atoi(num2Str)
 		if err != nil {
-			tpl.Execute(w, Data{Error: "Zweite Zahl ungültig!"})
+			_ = tpl.Execute(w, Data{Error: "Zweite Zahl ungültig!"})
 			return
 		}
 
 		result := processIntegers(num1, num2)
-		tpl.Execute(w, Data{Num1: num1, Num2: num2, Result: result})
+		_ = tpl.Execute(w, Data{Num1: num1, Num2: num2, Result: result})
 	})
 
-	fmt.Println("🚀 Server: http://localhost:8080")
-	fmt.Println("⏳ Öffne Browser...")
+	fmt.Println("Server: http://localhost:8080")
+	fmt.Println("Browser...")
 
-	// Browser nach 3s (Linux Mint Vivaldi)
 	go func() {
 		time.Sleep(3 * time.Second)
-		exec.Command("vivaldi-stable", "http://localhost:8080").Start()
+		openBrowser("http://localhost:8080")
 	}()
 
-	// BLOCKIEREND - Server läuft
-	http.ListenAndServe(":8080", nil)
+	_ = http.ListenAndServe(":8080", nil)
+}
+
+func openBrowser(url string) error {
+	switch runtime.GOOS {
+	case "linux":
+		return exec.Command("vivaldi-stable", url).Start()
+	case "windows":
+		return exec.Command("cmd", "/c", "start", "msedge", url).Start()
+	default:
+		return exec.Command("xdg-open", url).Start()
+	}
 }
 
 func processIntegers(a, b int) string {
+	fmt.Println("data processing ...")
+	fmt.Println(a, b)
 	return fmt.Sprintf(
 		"Ergebnisse:\n• Summe: %d + %d = %d\n• Produkt: %d × %d = %d\n• Differenz: %d - %d = %d\n• Quotient: %d ÷ %d = %d",
 		a, b, a+b, a, b, a*b, a, b, a-b, a, b, a/b,
