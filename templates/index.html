@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Integer Rechner</title>
+    <title>Data Storage</title>
     <meta charset="UTF-8">
     <style>
         body { 
@@ -31,19 +31,19 @@
     </style>
 </head>
 <body>
-    <h1>🧮 Integer Rechner</h1>
-    <p>Gib zwei Zahlen ein und drücke Berechnen!</p>
+    <h1>Data Storage</h1>
+    <p>Input Numbers</p>
     
     <form method="POST" action="/calculate">
         <div class="form-group">
-            <label>Erste Zahl:</label>
+            <label>number 1:</label>
             <input type="number" name="num1" required min="-999999" max="999999">
         </div>
         <div class="form-group">
-            <label>Zweite Zahl:</label>
+            <label>number 2:</label>
             <input type="number" name="num2" required min="-999999" max="999999">
         </div>
-        <button type="submit">🔢 Berechnen!</button>
+        <button type="submit">Apply</button>
     </form>
 </body>
 </html>
