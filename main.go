@@ -10,11 +10,11 @@ import (
 	"time"
 )
 
-type Data struct {
-	Num1   int
-	Num2   int
-	Result string
-	Error  string
+type InputData struct {
+	Option1, Option2, Option3, Option4, Option5 string
+	Scores                                      [18]int
+	Result                                      string
+	Error                                       string
 }
 
 // ======================================================================================
@@ -37,7 +37,7 @@ func main() {
 	// tpl.execute is rendering template and it will send to browser
 	// data object as empty object
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		_ = tpl.Execute(w, Data{})
+		_ = tpl.Execute(w, InputData{})
 	})
 	// register second route, responsible for final content
 	// send formular per POST
@@ -48,23 +48,39 @@ func main() {
 			return
 		}
 		// read input lines
-		// convert into integer
-		num1Str := r.FormValue("num1")
-		num2Str := r.FormValue("num2")
-		num1, err := strconv.Atoi(num1Str)
-		if err != nil {
-			_ = tpl.Execute(w, Data{Error: "invalid number"})
-			return
-		}
-		num2, err := strconv.Atoi(num2Str)
-		if err != nil {
-			_ = tpl.Execute(w, Data{Error: "invalid number"})
-			return
+		var input InputData
+
+		// read all 5 option inputs (strings)
+		input.Option1 = r.FormValue("option1")
+		input.Option2 = r.FormValue("option2")
+		input.Option3 = r.FormValue("option3")
+		input.Option4 = r.FormValue("option4")
+		input.Option5 = r.FormValue("option5")
+
+		// read all 18 score inputs (integers 0..99)
+		for i := 1; i <= 18; i++ {
+			name := fmt.Sprintf("score%d", i)
+			s := r.FormValue(name)
+			if s == "" {
+				input.Scores[i-1] = 0
+				continue
+			}
+			n, err := strconv.Atoi(s)
+			if err != nil {
+				_ = tpl.Execute(w, InputData{Error: "invalid score: " + s})
+				return
+			}
+			if n < 0 || n > 99 {
+				_ = tpl.Execute(w, InputData{Error: "score must be 0–99"})
+				return
+			}
+			input.Scores[i-1] = n
 		}
 		// processing numbers in separate function
-		result := processIntegers(num1, num2)
+		result := processInput(input)
+		input.Result = result
 		// fill template with numbers
-		_ = tpl.Execute(w, Data{Num1: num1, Num2: num2, Result: result})
+		_ = tpl.Execute(w, input)
 	})
 	// adress of server
 	fmt.Println("Server: http://localhost:8080")
@@ -101,8 +117,9 @@ func openBrowser(url string) error {
 // processIntegers
 //
 // ======================================================================================
-func processIntegers(a, b int) string {
+func processInput(input InputData) string {
 	fmt.Println("data processing ...")
-	fmt.Println(a, b)
+	fmt.Println(input.Option1)
+	fmt.Println(input.Scores[1])
 	return "result"
 }

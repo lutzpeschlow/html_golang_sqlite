@@ -17,8 +17,3 @@ sqlite database is extended with new values
 read sqlite database to do some additional statistics
 
 
-
-1. localhost:8080 → schönes HTML-Formular
-2. 42 + 7 eingeben → "Berechnen!"
-3. POST /calculate → Go verarbeitet
-4. Gleiche Seite mit Ergebnis + Eingaben gefüllt

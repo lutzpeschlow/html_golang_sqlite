@@ -1,49 +1,151 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Data Storage</title>
+    <title>Input Form</title>
     <meta charset="UTF-8">
     <style>
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial; 
-            max-width: 500px; margin: 50px auto; padding: 20px; 
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial;
+            margin: 20px auto;
+            padding: 10px 20px;
+            max-width: 900px;
+            font-size: 16px;
         }
-        .form-group { margin-bottom: 15px; }
-        input[type=number] { 
-            width: 100%; padding: 12px; font-size: 18px; 
-            border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box;
+
+        h2 {
+            font-size: 20px;
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 2px;        /* weniger Platz unter Options-Titel */
         }
-        button { 
-            width: 100%; padding: 15px; font-size: 18px; 
-            background: linear-gradient(45deg, #28a745, #20c997); 
-            color: white; border: none; border-radius: 8px; 
-            cursor: pointer; transition: transform 0.2s;
+
+        .form-container {
+            max-width: 300px;
+            margin: 0 auto;
+            padding: 10px 0;
         }
-        button:hover { transform: scale(1.02); }
-        .result { 
-            margin-top: 20px; padding: 20px; background: #d4edda; 
-            border-radius: 8px; border-left: 5px solid #28a745;
+
+        .options {
+            margin-top: 5px;           /* Boxen näher an der Überschrift */
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
-        .error { 
-            margin-top: 20px; padding: 20px; background: #f8d7da; 
-            border-radius: 8px; border-left: 5px solid #dc3545; color: #721c24;
+
+        .options input[type="text"] {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+
+        h2 + .form-container h2 {
+            margin-top: 25px;          /* mehr Abstand über "Input Score" */
+            margin-bottom: 5px;
+        }
+
+        .scores {
+            margin-top: 15px;          /* etwas mehr Abstand nach oben */
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .score-column {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            width: fit-content;
+        }
+
+        input[name^="score"] {
+            width: 60px;
+            padding: 8px 6px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 20px;
+            padding: 12px 15px;
+            font-size: 16px;
+            background: linear-gradient(45deg, #28a745, #20c945);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: scale(1.02);
         }
     </style>
 </head>
 <body>
-    <h1>Data Storage</h1>
-    <p>Input Numbers</p>
-    
-    <form method="POST" action="/calculate">
-        <div class="form-group">
-            <label>number 1:</label>
-            <input type="number" name="num1" required min="-999999" max="999999">
-        </div>
-        <div class="form-group">
-            <label>number 2:</label>
-            <input type="number" name="num2" required min="-999999" max="999999">
-        </div>
-        <button type="submit">Apply</button>
-    </form>
+    <h2>Input Options</h2>
+
+    <div class="form-container">
+        <form method="POST" action="/calculate">
+            <div class="options">
+                <div class="form-group">
+                    <input type="text" name="option1" >
+                </div>
+                <div class="form-group">
+                    <input type="text" name="option2" >
+                </div>
+                <div class="form-group">
+                    <input type="text" name="option3" >
+                </div>
+                <div class="form-group">
+                    <input type="text" name="option4" >
+                </div>
+                <div class="form-group">
+                    <input type="text" name="option5" >
+                </div>
+            </div>
+
+            <h2>Input Score</h2>
+
+            <div class="scores">
+                <div class="score-column">
+                    <div class="form-group"><input type="number" name="score1"  min="0" max="99"></div>
+                    <div class="form-group"><input type="number" name="score2"  min="0" max="99"></div>
+                    <div class="form-group"><input type="number" name="score3"  min="0" max="99"></div>
+                    <div class="form-group"><input type="number" name="score4"  min="0" max="99"></div>
+                    <div class="form-group"><input type="number" name="score5"  min="0" max="99"></div>
+                    <div class="form-group"><input type="number" name="score6"  min="0" max="99"></div>
+                    <div class="form-group"><input type="number" name="score7"  min="0" max="99"></div>
+                    <div class="form-group"><input type="number" name="score8"  min="0" max="99"></div>
+                    <div class="form-group"><input type="number" name="score9"  min="0" max="99"></div>
+                </div>
+
+                <div class="score-column">
+                    <div class="form-group"><input type="number" name="score10"  min="0" max="99"></div>
+                    <div class="form-group"><input type="number" name="score11"  min="0" max="99"></div>
+                    <div class="form-group"><input type="number" name="score12"  min="0" max="99"></div>
+                    <div class="form-group"><input type="number" name="score13"  min="0" max="99"></div>
+                    <div class="form-group"><input type="number" name="score14"  min="0" max="99"></div>
+                    <div class="form-group"><input type="number" name="score15"  min="0" max="99"></div>
+                    <div class="form-group"><input type="number" name="score16"  min="0" max="99"></div>
+                    <div class="form-group"><input type="number" name="score17"  min="0" max="99"></div>
+                    <div class="form-group"><input type="number" name="score18"  min="0" max="99"></div>
+                </div>
+            </div>
+
+            <button type="submit">Apply</button>
+        </form>
+    </div>
 </body>
 </html>
