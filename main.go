@@ -4,12 +4,18 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
-	"objects"
 	"os/exec"
 	"runtime"
 	"strconv"
 	"time"
 )
+
+type InputData struct {
+	Option1, Option2, Option3, Option4, Option5 string
+	Scores                                      [18]int
+	Result                                      string
+	Error                                       string
+}
 
 // ======================================================================================
 // main
@@ -30,7 +36,7 @@ func main() {
 	// anonymous function, will defined directly
 	// tpl.execute is rendering template and it will send to browser
 	// data object as empty object
-	inp_obj := objects.InputData{}
+	inp_obj := InputData{}
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		_ = tpl.Execute(w, inp_obj)
 	})
@@ -43,37 +49,12 @@ func main() {
 			return
 		}
 		// read input lines
-		var input objects.InputData
-
-		// read all 5 option inputs (strings)
-		input.Option1 = r.FormValue("option1")
-		input.Option2 = r.FormValue("option2")
-		input.Option3 = r.FormValue("option3")
-		input.Option4 = r.FormValue("option4")
-		input.Option5 = r.FormValue("option5")
-
-		// read all 18 score inputs (integers 0..99)
-		for i := 1; i <= 18; i++ {
-			name := fmt.Sprintf("score%d", i)
-			s := r.FormValue(name)
-			if s == "" {
-				input.Scores[i-1] = 0
-				continue
-			}
-			n, err := strconv.Atoi(s)
-			if err != nil {
-				_ = tpl.Execute(w, InputData{Error: "invalid score: " + s})
-				return
-			}
-			if n < 0 || n > 99 {
-				_ = tpl.Execute(w, InputData{Error: "score must be 0–99"})
-				return
-			}
-			input.Scores[i-1] = n
+		var input InputData
+		if err := readInput(&input, r, w, tpl); err != nil {
+			return
 		}
 		// processing numbers in separate function
-		result := processInput(input)
-		input.Result = result
+		processInput(&input)
 		// fill template with numbers
 		_ = tpl.Execute(w, input)
 	})
@@ -109,12 +90,50 @@ func openBrowser(url string) error {
 
 // ======================================================================================
 //
+// readInput
+//
+// ======================================================================================
+// readInput liest Form-Daten in input, validiert und setzt Errors
+func readInput(input *InputData, r *http.Request, w http.ResponseWriter, tpl *template.Template) error {
+	// 5 Optionen als Strings
+	input.Option1 = r.FormValue("option1")
+	input.Option2 = r.FormValue("option2")
+	input.Option3 = r.FormValue("option3")
+	input.Option4 = r.FormValue("option4")
+	input.Option5 = r.FormValue("option5")
+
+	// 18 Scores validieren & parsen
+	for i := 1; i <= 18; i++ {
+		name := fmt.Sprintf("score%d", i)
+		s := r.FormValue(name)
+		if s == "" {
+			input.Scores[i-1] = 0
+			continue
+		}
+		n, err := strconv.Atoi(s)
+		if err != nil {
+			input.Error = "invalid score: " + s
+			tpl.Execute(w, input)
+			return err // Stoppt Handler
+		}
+		if n < 0 || n > 99 {
+			input.Error = "score must be 0–99"
+			tpl.Execute(w, input)
+			return fmt.Errorf("invalid range")
+		}
+		input.Scores[i-1] = n
+	}
+	return nil // Erfolg
+}
+
+// ======================================================================================
+//
 // processIntegers
 //
 // ======================================================================================
-func processInput(input InputData) string {
+func processInput(input *InputData) {
 	fmt.Println("data processing ...")
 	fmt.Println(input.Option1)
 	fmt.Println(input.Scores[1])
-	return "result"
+
 }
