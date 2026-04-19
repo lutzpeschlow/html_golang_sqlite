@@ -4,18 +4,12 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"objects"
 	"os/exec"
 	"runtime"
 	"strconv"
 	"time"
 )
-
-type InputData struct {
-	Option1, Option2, Option3, Option4, Option5 string
-	Scores                                      [18]int
-	Result                                      string
-	Error                                       string
-}
 
 // ======================================================================================
 // main
@@ -36,8 +30,9 @@ func main() {
 	// anonymous function, will defined directly
 	// tpl.execute is rendering template and it will send to browser
 	// data object as empty object
+	inp_obj := objects.InputData{}
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		_ = tpl.Execute(w, InputData{})
+		_ = tpl.Execute(w, inp_obj)
 	})
 	// register second route, responsible for final content
 	// send formular per POST
@@ -48,7 +43,7 @@ func main() {
 			return
 		}
 		// read input lines
-		var input InputData
+		var input objects.InputData
 
 		// read all 5 option inputs (strings)
 		input.Option1 = r.FormValue("option1")
