@@ -11,10 +11,14 @@ import (
 )
 
 type InputData struct {
-	Option1, Option2, Option3, Option4, Option5 string
-	Scores                                      [18]int
-	Result                                      string
-	Error                                       string
+	Option1 string
+	Option2 string
+	Option3 string
+	Option4 string
+	Option5 string
+	Scores  [18]int
+	Result  string
+	Error   string
 }
 
 // ======================================================================================
@@ -55,6 +59,7 @@ func main() {
 		}
 		// processing numbers in separate function
 		processInput(&input)
+		process_data.process_input_data(&input)
 		// fill template with numbers
 		_ = tpl.Execute(w, input)
 	})
