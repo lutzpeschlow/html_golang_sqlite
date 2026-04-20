@@ -33,7 +33,6 @@ import (
 func ProcessInputData(obj *objects.InputData) int {
 	fmt.Println("...")
 	fmt.Println("data processing ...")
-	objects.GetDebugPrintout(&objects.InputData{})
 	// (1) options
 	// (1.1) date
 	fmt.Println(obj.Option1)
@@ -54,10 +53,12 @@ func ProcessInputData(obj *objects.InputData) int {
 	obj.Option4 = strings.ToUpper(strings.TrimSpace(obj.Option4))
 	obj.Option5 = strings.ToUpper(strings.TrimSpace(obj.Option5))
 	// (2) Scores
-	if len(obj.Scores) != 9 && len(obj.Scores) != 18 {
+	num_holes := countNonZero(obj.Scores)
+	if num_holes != 9 && num_holes != 18 {
 		fmt.Println("ERROR: number of holes should be 9 or 18 ...")
 		return 1
 	}
+	fmt.Println("finealized processing ...")
 	// return value
 	return 0
 
@@ -88,4 +89,21 @@ func parseGermanDate(s string) (time.Time, error) {
 		lastErr = err
 	}
 	return time.Time{}, lastErr
+}
+
+// ======================================================================================
+//
+// countNonZero
+//
+// the array of
+//
+// ======================================================================================
+func countNonZero(scores [18]int) int {
+	count := 0
+	for _, v := range scores {
+		if v != 0 {
+			count++
+		}
+	}
+	return count
 }

@@ -13,13 +13,9 @@ type InputData struct {
 	Error   string
 }
 
-func GetDebugPrintout(obj *InputData) {
-	fmt.Println("debug printout ...")
-	fmt.Println("  ", obj.Option1)
-	fmt.Println("  ", obj.Option2)
-	fmt.Println("  ", obj.Option3)
-	fmt.Println("  ", obj.Option4)
-	fmt.Println("  ", obj.Option5)
-	fmt.Println("  ", obj.Scores)
+func GetDebugPrintout(o *InputData) {
+	fmt.Println("debug printout of InputData:")
+	fmt.Println(" ", o.Option1, ",", o.Option2, ",", o.Option3, ",", o.Option4, ",", o.Option5)
+	fmt.Println(" ", o.Scores)
 
 }

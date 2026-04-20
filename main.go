@@ -37,9 +37,9 @@ func main() {
 	// anonymous function, will defined directly
 	// tpl.execute is rendering template and it will send to browser
 	// data object as empty object
-	inp_obj := objects.InputData{}
+	// inp_obj := objects.InputData{}
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		_ = tpl.Execute(w, inp_obj)
+		_ = tpl.Execute(w, objects.InputData{})
 	})
 	// register second route, responsible for final content
 	// send formular per POST
@@ -55,9 +55,12 @@ func main() {
 			return
 		}
 		// processing numbers in separate function
-		process_data.ProcessInputData(&input)
+		status := process_data.ProcessInputData(&input)
+		fmt.Println("in main after processing ...")
+		if status > 0 {
+			fmt.Println("ERROR: no valid input ...")
+		}
 		objects.GetDebugPrintout(&input)
-
 		// fill template with numbers
 		_ = tpl.Execute(w, input)
 	})
