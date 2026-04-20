@@ -56,6 +56,8 @@ func main() {
 		}
 		// processing numbers in separate function
 		process_data.ProcessInputData(&input)
+		objects.GetDebugPrintout(&input)
+
 		// fill template with numbers
 		_ = tpl.Execute(w, input)
 	})

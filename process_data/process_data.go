@@ -33,6 +33,7 @@ import (
 func ProcessInputData(obj *objects.InputData) int {
 	fmt.Println("...")
 	fmt.Println("data processing ...")
+	objects.GetDebugPrintout(&objects.InputData{})
 	// (1) options
 	// (1.1) date
 	fmt.Println(obj.Option1)
@@ -53,7 +54,10 @@ func ProcessInputData(obj *objects.InputData) int {
 	obj.Option4 = strings.ToUpper(strings.TrimSpace(obj.Option4))
 	obj.Option5 = strings.ToUpper(strings.TrimSpace(obj.Option5))
 	// (2) Scores
-	fmt.Println(obj.Scores[1])
+	if len(obj.Scores) != 9 && len(obj.Scores) != 18 {
+		fmt.Println("ERROR: number of holes should be 9 or 18 ...")
+		return 1
+	}
 	// return value
 	return 0
 
