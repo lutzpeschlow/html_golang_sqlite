@@ -1,135 +1,120 @@
-Perfekt! Jetzt erkläre ich dir Schritt für Schritt, was in deinem Go-Programm passiert:
 
-Programm-Ablauf (Zeitstrahl)
-text
-1. go run main.go
-2. ↓ main() startet
-3. ↓ Templates laden
-4. ↓ Routes registrieren
-5. ↓ Server blockiert (lauscht Ewig)
-6. ↓ Browser Goroutine nach 3s
-7. ↓ Vivaldi öffnet → Request!
-1. START: main()
-go
-tpl := template.Must(template.ParseFiles("templates/index.html"))
-Lädt templates/index.html → Go-Template-Objekt im RAM.
+Nächste Schritte
+DB-Verbindung zentralisieren.
+Lege ein db-Paket oder storage-Paket an, das *sql.DB öffnet und schließt. Üblich ist dabei, SQLite mit database/sql zu nutzen und alles über dieselbe DB-Instanz zu fahren.
 
-2. ROUTES registrieren
-text
-http.HandleFunc("/", ...)        ← GET / → Formular anzeigen
-http.HandleFunc("/calculate", ...) ← POST /calculate → Zahlen verarbeiten
-3. SERVER blockiert (ListenAndServe)
-text
-http.ListenAndServe(":8080", nil)
-Go wartet EWIIG auf HTTP-Requests auf Port 8080. Programm läuft!
+Tabelle definieren.
+Erstelle eine Tabelle für deine validierten Daten, z. B. mit Spalten für Datum, Optionen, einzelne Scores oder alternativ einem JSON-Feld für die Scores. SQLite-Inserts werden typischerweise mit Platzhaltern ? und Exec oder vorbereiteten Statements geschrieben.
 
-4. BROWSER-GOROUTINE (nach 3s)
-go
-go func() {
-    time.Sleep(3 * time.Second)
-    exec.Command("vivaldi-stable", "http://localhost:8080").Start()
-}()
-Parallel: Vivaldi öffnet → GET / Request!
+Repository anlegen.
+Beispiel: type RoundRepository struct { db *sql.DB } mit Methoden wie Create(record RoundRecord) (int64, error). Das hält deine HTTP-Handler schlank und trennt Web, Logik und Speicherung sauber.
 
-5. USER KLICKT "Berechnen"
-text
-<form method="POST" action="/calculate">
-Browser sendet: POST /calculate mit num1=42&num2=7
+Mapping von Input auf DB-Modell.
+Nach ProcessInputData(&input) wandelst du InputData in RoundRecord um. So kannst du interne Validierung behalten und trotzdem ein sauberes Persistenzmodell speichern.
 
-6. POST /calculate Handler
-text
-1. r.FormValue("num1") → "42"
-2. strconv.Atoi("42") → 42 (int)
-3. processIntegers(42, 7) → "Ergebnisse...\n"
-4. tpl.Execute() → HTML mit {{.Result}} gefüllt
-5. Browser zeigt Ergebnis
-Datenfluss (Grafik)
-text
-[Browser] POST /calculate (num1=42, num2=7)
-       ↓
-[Go Server] r.FormValue() → strconv.Atoi()
-       ↓
-[processIntegers()] → "42+7=49..."
-       ↓  
-[Template] {{.Num1}} {{.Result}} → HTML
-       ↓
-[Browser] Ergebnis anzeigen
-Template-Magie ({{}})
-xml
-<!-- Eingaben bleiben gefüllt! -->
-<input name="num1" value="{{.Num1}}">  <!-- 42 bleibt! -->
-<div>{{.Result}}</div>                 <!-- "42+7=49..." -->
-Warum das genial ist:
-text
-✅ 1 Datei (main.go)
-✅ 1 HTML (index.html) 
-✅ 0 Dependencies
-✅ Auto-Browser-Start
-✅ Form + Ergebnis 1 Seite
-✅ Inline-Funktionen (kein Durcheinander)
-Runtime:
-text
-Programm startet → wartet EWIIG
-Jeder Request → neues HTML generiert
-Strg+C → Server stoppt
-Zusammengefasst: Template → Routes → Handler → Funktion → Template = vollständige Web-App mit 15 Zeilen Kernlogik! 
+Im Handler speichern.
+Im /calculate-Handler nach erfolgreicher Verarbeitung:
 
+Validieren
+
+In DB-Modell umwandeln
+
+repo.Create(...)
+
+Danach Template rendern oder Redirect ausführen
+
+
+status := process_data.ProcessInputData(&input)
+if status > 0 {
+    // Fehler behandeln
+    return
+}
+
+record := objects.RoundRecord{
+    Date:    parsedDate,
+    Option2: input.Option2,
+    Option3: input.Option3,
+    Option4: input.Option4,
+    Option5: input.Option5,
+    Scores:  input.Scores,
+}
+
+id, err := repo.Create(record)
+if err != nil {
+    // DB-Fehler behandeln
+    return
+}
+
+Für die Insert-Implementierung ist ein vorbereitetes Statement sinnvoll, z. B. db.Prepare(...) und danach stmt.Exec(...), weil das sauberer und sicherer ist als String-Konkatenation.
+
+Wichtige Designfrage
+Du solltest jetzt entscheiden, wie du die Scores speicherst:
+
+18 einzelne Spalten: gut für Auswertungen auf Loch-Ebene.
+
+JSON in einer Spalte: einfacher beim Speichern, flexibler, aber schlechter für SQL-Abfragen.
+
+9/18 feste Spalten plus Metadaten: sinnvoll, wenn das Schema stabil bleibt.
+
+Für Golfergebnisse sind 18 einzelne Felder oft am praktischsten, wenn du später statistisch auswerten willst.
+
+Sinnvolle Reihenfolge für dich
+objects.RoundRecord anlegen.
+
+db/repository-Paket bauen.
+
+SQLite-Tabelle erstellen.
+
+Create(...)-Methode implementieren.
+
+Im Handler speichern.
+
+Danach bei Bedarf ReadAll() für Anzeige oder Debugging ergänzen.
+
+Ich kann dir als Nächstes direkt eine saubere Go-Struktur mit db.go, repository.go, CREATE TABLE und INSERT-Code für dein Projekt entwerfen.
 
 
 
 
 
+_, err := db.Exec(`
+    INSERT INTO rounds (
+        date, option2, option3, option4, option5,
+        score1, score2, score3, score4, score5, score6, score7, score8, score9,
+        score10, score11, score12, score13, score14, score15, score16, score17, score18,
+        created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+`,
+    data.Date,
+    data.Option2, data.Option3, data.Option4, data.Option5,
+    data.Scores[0], data.Scores[1], data.Scores[2], data.Scores[3], data.Scores[4],
+    data.Scores[5], data.Scores[6], data.Scores[7], data.Scores[8], data.Scores[9],
+    data.Scores[10], data.Scores[11], data.Scores[12], data.Scores[13], data.Scores[14],
+    data.Scores[15], data.Scores[16], data.Scores[17],
+    data.CreatedAt,
+)
 
+Bessere Trennung
+Ich würde es so aufbauen:
 
+InputData: direkt aus dem Formular.
 
+SqlData: bereinigt und speicherfertig.
 
+Repository: kennt das INSERT.
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Data Storage</title>
-    <meta charset="UTF-8">
-    <style>
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial; 
-            max-width: 500px; margin: 50px auto; padding: 20px; 
-        }
-        .form-group { margin-bottom: 15px; }
-        input[type=number] { 
-            width: 100%; padding: 12px; font-size: 18px; 
-            border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box;
-        }
-        button { 
-            width: 100%; padding: 15px; font-size: 18px; 
-            background: linear-gradient(45deg, #28a745, #20c997); 
-            color: white; border: none; border-radius: 8px; 
-            cursor: pointer; transition: transform 0.2s;
-        }
-        button:hover { transform: scale(1.02); }
-        .result { 
-            margin-top: 20px; padding: 20px; background: #d4edda; 
-            border-radius: 8px; border-left: 5px solid #28a745;
-        }
-        .error { 
-            margin-top: 20px; padding: 20px; background: #f8d7da; 
-            border-radius: 8px; border-left: 5px solid #dc3545; color: #721c24;
-        }
-    </style>
-</head>
-<body>
-    <h1>Data Storage</h1>
-    <p>Input Numbers</p>
-    
-    <form method="POST" action="/calculate">
-        <div class="form-group">
-            <label>number 1:</label>
-            <input type="number" name="num1" required min="-999999" max="999999">
-        </div>
-        <div class="form-group">
-            <label>number 2:</label>
-            <input type="number" name="num2" required min="-999999" max="999999">
-        </div>
-        <button type="submit">Apply</button>
-    </form>
-</body>
-</html>
+scores [18]int: bleibt im Go-Objekt, wird nur beim Insert in Einzelwerte zerlegt.
+
+Wann ein Array in der DB sinnvoller wäre
+Wenn du die 18 Scores meist nur komplett speicherst und selten einzeln auswertest, könntest du sie auch als JSON in einer Spalte ablegen. Wenn du später aber pro Loch filtern, sortieren oder statistisch auswerten willst, sind 18 Spalten deutlich besser.
+
+Empfehlung für dein Projekt
+Für dein aktuelles Setup würde ich:
+
+SqlData mit Scores [18]int behalten.
+
+In SQLite 18 Score-Spalten anlegen.
+
+Beim Speichern das Array explizit auf die 18 Spalten mappen.
+
+Ich kann dir direkt als Nächstes das passende CREATE TABLE plus ein Repository.Create(SqlData) in Go schreiben.

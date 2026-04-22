@@ -1,6 +1,9 @@
 package objects
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 type InputData struct {
 	Option1 string
@@ -11,6 +14,17 @@ type InputData struct {
 	Scores  [18]int
 	Result  string
 	Error   string
+}
+
+type SqlData struct {
+	ID        int64
+	Date      time.Time
+	Option2   string
+	Option3   string
+	Option4   string
+	Option5   string
+	Scores    [18]int
+	CreatedAt time.Time
 }
 
 func GetDebugPrintout(o *InputData) {
