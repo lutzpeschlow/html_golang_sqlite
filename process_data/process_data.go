@@ -42,6 +42,7 @@ func ProcessInputData(obj *objects.InputData) int {
 		return 1
 	}
 	fmt.Println("processing date: ", t)
+	obj.Date = t
 	// (1.2) location
 	obj.Option2 = strings.ToUpper(strings.TrimSpace(obj.Option2))
 	// (1.3) Type

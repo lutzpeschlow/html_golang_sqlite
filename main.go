@@ -51,6 +51,7 @@ func main() {
 		}
 		// read input lines
 		var input objects.InputData
+		var sql objects.SqlData
 		if err := read_data.ReadInput(&input, r, w, tpl); err != nil {
 			return
 		}
@@ -61,6 +62,9 @@ func main() {
 			fmt.Println("ERROR: no valid input ...")
 		}
 		objects.GetDebugPrintoutInput(&input)
+		// transfer to sql object
+		status = sql_data.PrepareSQLData(&input, &sql)
+		objects.GetDebugPrintoutSql(&sql)
 		// fill template with numbers
 		_ = tpl.Execute(w, input)
 	})
@@ -77,6 +81,20 @@ func main() {
 	// webserver start at port 8080
 	_ = http.ListenAndServe(":8080", nil)
 }
+
+// status := process_data.ProcessInputData(&input)
+// if status > 0 {
+// 	fmt.Println("ERROR: no valid input ...")
+// 	return
+// }
+//
+// sqlObj := sqldata.PrepareSQLData(&input, parsedDate)
+// id, err := sqldata.InsertSQLData(db, sqlObj)
+// if err != nil {
+// 	fmt.Println("DB error:", err)
+// 	return
+// }
+// fmt.Println("Inserted ID:", id)
 
 // ======================================================================================
 //

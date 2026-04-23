@@ -6,6 +6,7 @@ import (
 )
 
 type InputData struct {
+	Date    time.Time
 	Option1 string
 	Option2 string
 	Option3 string
@@ -23,17 +24,33 @@ type SqlData struct {
 	Option3   string
 	Option4   string
 	Option5   string
-	Scores    [18]int
+	Score1    int
+	Score2    int
+	Score3    int
+	Score4    int
+	Score5    int
+	Score6    int
+	Score7    int
+	Score8    int
+	Score9    int
+	Score10   int
+	Score11   int
+	Score12   int
+	Score13   int
+	Score14   int
+	Score15   int
+	Score16   int
+	Score17   int
+	Score18   int
 	CreatedAt time.Time
 }
 
-func GetDebugPrintoutInput(o *InputData) {
+func GetDebugPrintoutInput(obj *InputData) {
 	fmt.Println("debug printout of InputData:")
-	fmt.Println(" ", o.Option1, ",", o.Option2, ",", o.Option3, ",", o.Option4, ",", o.Option5)
-	fmt.Println(" ", o.Scores)
+	fmt.Printf("%+v\n", obj)
 }
 
-func GetDebugPrintoutSql(s *SqlData) {
+func GetDebugPrintoutSql(obj *SqlData) {
 	fmt.Println("debug printout of SqlData:")
-	fmt.Println(s)
+	fmt.Printf("%+v\n", obj)
 }
