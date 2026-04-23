@@ -60,7 +60,7 @@ func main() {
 		if status > 0 {
 			fmt.Println("ERROR: no valid input ...")
 		}
-		objects.GetDebugPrintout(&input)
+		objects.GetDebugPrintoutInput(&input)
 		// fill template with numbers
 		_ = tpl.Execute(w, input)
 	})

@@ -27,9 +27,13 @@ type SqlData struct {
 	CreatedAt time.Time
 }
 
-func GetDebugPrintout(o *InputData) {
+func GetDebugPrintoutInput(o *InputData) {
 	fmt.Println("debug printout of InputData:")
 	fmt.Println(" ", o.Option1, ",", o.Option2, ",", o.Option3, ",", o.Option4, ",", o.Option5)
 	fmt.Println(" ", o.Scores)
+}
 
+func GetDebugPrintoutSql(s *SqlData) {
+	fmt.Println("debug printout of SqlData:")
+	fmt.Println(s)
 }

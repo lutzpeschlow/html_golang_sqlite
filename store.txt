@@ -1,16 +1,25 @@
 
 Nächste Schritte
 DB-Verbindung zentralisieren.
-Lege ein db-Paket oder storage-Paket an, das *sql.DB öffnet und schließt. Üblich ist dabei, SQLite mit database/sql zu nutzen und alles über dieselbe DB-Instanz zu fahren.
+Lege ein db-Paket oder storage-Paket an, das *sql.DB öffnet und schließt. 
+Üblich ist dabei, SQLite mit database/sql zu nutzen und alles über dieselbe 
+DB-Instanz zu fahren.
 
 Tabelle definieren.
-Erstelle eine Tabelle für deine validierten Daten, z. B. mit Spalten für Datum, Optionen, einzelne Scores oder alternativ einem JSON-Feld für die Scores. SQLite-Inserts werden typischerweise mit Platzhaltern ? und Exec oder vorbereiteten Statements geschrieben.
+Erstelle eine Tabelle für deine validierten Daten, 
+z. B. mit Spalten für Datum, Optionen, einzelne Scores oder alternativ 
+einem JSON-Feld für die Scores. 
+SQLite-Inserts werden typischerweise mit Platzhaltern ? und Exec 
+oder vorbereiteten Statements geschrieben.
 
 Repository anlegen.
-Beispiel: type RoundRepository struct { db *sql.DB } mit Methoden wie Create(record RoundRecord) (int64, error). Das hält deine HTTP-Handler schlank und trennt Web, Logik und Speicherung sauber.
+Beispiel: type RoundRepository struct { db *sql.DB } mit Methoden wie 
+Create(record RoundRecord) (int64, error). 
+Das hält deine HTTP-Handler schlank und trennt Web, Logik und Speicherung sauber.
 
 Mapping von Input auf DB-Modell.
-Nach ProcessInputData(&input) wandelst du InputData in RoundRecord um. So kannst du interne Validierung behalten und trotzdem ein sauberes Persistenzmodell speichern.
+Nach ProcessInputData(&input) wandelst du InputData in RoundRecord um. 
+So kannst du interne Validierung behalten und trotzdem ein sauberes Persistenzmodell speichern.
 
 Im Handler speichern.
 Im /calculate-Handler nach erfolgreicher Verarbeitung:
@@ -45,7 +54,8 @@ if err != nil {
     return
 }
 
-Für die Insert-Implementierung ist ein vorbereitetes Statement sinnvoll, z. B. db.Prepare(...) und danach stmt.Exec(...), weil das sauberer und sicherer ist als String-Konkatenation.
+Für die Insert-Implementierung ist ein vorbereitetes Statement sinnvoll, 
+z. B. db.Prepare(...) und danach stmt.Exec(...), weil das sauberer und sicherer ist als String-Konkatenation.
 
 Wichtige Designfrage
 Du solltest jetzt entscheiden, wie du die Scores speicherst:
@@ -71,7 +81,8 @@ Im Handler speichern.
 
 Danach bei Bedarf ReadAll() für Anzeige oder Debugging ergänzen.
 
-Ich kann dir als Nächstes direkt eine saubere Go-Struktur mit db.go, repository.go, CREATE TABLE und INSERT-Code für dein Projekt entwerfen.
+Ich kann dir als Nächstes direkt eine saubere Go-Struktur mit db.go, repository.go, 
+CREATE TABLE und INSERT-Code für dein Projekt entwerfen.
 
 
 
@@ -106,7 +117,9 @@ Repository: kennt das INSERT.
 scores [18]int: bleibt im Go-Objekt, wird nur beim Insert in Einzelwerte zerlegt.
 
 Wann ein Array in der DB sinnvoller wäre
-Wenn du die 18 Scores meist nur komplett speicherst und selten einzeln auswertest, könntest du sie auch als JSON in einer Spalte ablegen. Wenn du später aber pro Loch filtern, sortieren oder statistisch auswerten willst, sind 18 Spalten deutlich besser.
+Wenn du die 18 Scores meist nur komplett speicherst und selten einzeln auswertest, 
+könntest du sie auch als JSON in einer Spalte ablegen. Wenn du später aber pro Loch filtern, 
+sortieren oder statistisch auswerten willst, sind 18 Spalten deutlich besser.
 
 Empfehlung für dein Projekt
 Für dein aktuelles Setup würde ich:
@@ -118,3 +131,196 @@ In SQLite 18 Score-Spalten anlegen.
 Beim Speichern das Array explizit auf die 18 Spalten mappen.
 
 Ich kann dir direkt als Nächstes das passende CREATE TABLE plus ein Repository.Create(SqlData) in Go schreiben.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Ja — dafür ist es am saubersten, die Mapping-Logik und den DB-Write in ein eigenes Package auszulagern. 
+Wichtig ist: SQLite kann kein Go-Array wie [18]int direkt als eine Spalte speichern; du musst die 18 Werte 
+auf 18 Spalten abbilden oder alternativ als JSON/TEXT speichern. Für deinen Wunsch 
+„jeder Wert bekommt einen extra Platz“ ist die 18-Spalten-Variante die passende Lösung.
+
+Zielstruktur
+Ich würde es so aufteilen:
+
+objects: nur Datenstrukturen.
+
+process_data: Validierung und Bereinigung.
+
+sql_data: Vorbereitung für den SQL-Export und Insert in die Datenbank.
+
+Die vorbereitete SQL-Struktur sollte dann nicht mehr Scores [18]int enthalten, sondern 
+z. B. Score1 bis Score18 als einzelne Felder. Das passt besser zu SQLite und zu database/sql bzw. sqlx-artigen Insert-Methoden.
+
+Vorschlag für die Structs
+Deine bestehende SqlData-Struct würde ich umbauen zu:
+
+go
+package objects
+
+import "time"
+
+type SqlData struct {
+	ID        int64
+	Date      time.Time
+	Option2   string
+	Option3   string
+	Option4   string
+	Option5   string
+	Score1    int
+	Score2    int
+	Score3    int
+	Score4    int
+	Score5    int
+	Score6    int
+	Score7    int
+	Score8    int
+	Score9    int
+	Score10   int
+	Score11   int
+	Score12   int
+	Score13   int
+	Score14   int
+	Score15   int
+	Score16   int
+	Score17   int
+	Score18   int
+	CreatedAt time.Time
+}
+Wenn du später weniger duplizieren willst, kannst du auch ein Array behalten und nur beim SQL-Export aufsplitten, 
+aber für die Datenbank ist diese Form am einfachsten.
+
+Separate Mapping-Funktion
+Dann schreibst du in einem neuen Package eine Funktion, die aus InputData ein SqlData erzeugt:
+
+go
+package sqldata
+
+import (
+	"time"
+
+	"github.com/lutzpeschlow/html_golang_sqlite/objects"
+)
+
+func PrepareSQLData(in *objects.InputData, date time.Time) objects.SqlData {
+	return objects.SqlData{
+		Date:      date,
+		Option2:   in.Option2,
+		Option3:   in.Option3,
+		Option4:   in.Option4,
+		Option5:   in.Option5,
+		Score1:    in.Scores[0],
+		Score2:    in.Scores[1],
+		Score3:    in.Scores[2],
+		Score4:    in.Scores[3],
+		Score5:    in.Scores[4],
+		Score6:    in.Scores[5],
+		Score7:    in.Scores[6],
+		Score8:    in.Scores[7],
+		Score9:    in.Scores[8],
+		Score10:   in.Scores[9],
+		Score11:   in.Scores[10],
+		Score12:   in.Scores[11],
+		Score13:   in.Scores[12],
+		Score14:   in.Scores[13],
+		Score15:   in.Scores[14],
+		Score16:   in.Scores[15],
+		Score17:   in.Scores[16],
+		Score18:   in.Scores[17],
+		CreatedAt:  time.Now(),
+	}
+}
+Wichtig: In deinem ProcessInputData parst du das Datum schon, gib es am besten als time.Time zurück oder 
+speichere es direkt im Input-Objekt, damit du es hier verwenden kannst.
+
+Insert-Funktion
+Die zweite Funktion schreibt dann die Datenbank. Mit database/sql sieht das ungefähr so aus:
+
+go
+package sqldata
+
+import (
+	"database/sql"
+	"fmt"
+
+	"github.com/lutzpeschlow/html_golang_sqlite/objects"
+)
+
+func InsertSQLData(db *sql.DB, s objects.SqlData) (int64, error) {
+	query := `
+		INSERT INTO rounds (
+			date, option2, option3, option4, option5,
+			score1, score2, score3, score4, score5, score6, score7, score8, score9,
+			score10, score11, score12, score13, score14, score15, score16, score17, score18,
+			created_at
+		) VALUES (?, ?, ?, ?, ?,
+		          ?, ?, ?, ?, ?, ?, ?, ?, ?,
+		          ?, ?, ?, ?, ?, ?, ?, ?, ?,
+		          ?)
+	`
+
+	res, err := db.Exec(
+		query,
+		s.Date, s.Option2, s.Option3, s.Option4, s.Option5,
+		s.Score1, s.Score2, s.Score3, s.Score4, s.Score5, s.Score6, s.Score7, s.Score8, s.Score9,
+		s.Score10, s.Score11, s.Score12, s.Score13, s.Score14, s.Score15, s.Score16, s.Score17, s.Score18,
+		s.CreatedAt,
+	)
+	if err != nil {
+		return 0, fmt.Errorf("insert sql data: %w", err)
+	}
+	return res.LastInsertId()
+}
+SQLite nutzt in database/sql normalerweise ? als Platzhalter.
+
+Verwendung in main
+Dann wird dein Handler etwa so:
+
+go
+status := process_data.ProcessInputData(&input)
+if status > 0 {
+	fmt.Println("ERROR: no valid input ...")
+	return
+}
+
+sqlObj := sqldata.PrepareSQLData(&input, parsedDate)
+id, err := sqldata.InsertSQLData(db, sqlObj)
+if err != nil {
+	fmt.Println("DB error:", err)
+	return
+}
+fmt.Println("Inserted ID:", id)
+Dafür musst du db *sql.DB natürlich in main initialisieren und an den Handler übergeben oder in eine eigene App-Struktur packen.
+
+Empfehlenswerte kleine Änderung
+Aktuell parsed ProcessInputData das Datum, gibt es aber nicht nach außen weiter. Sauberer wäre:
+
+ProcessInputData(obj *objects.InputData) (time.Time, int)
+oder
+
+InputData bekommt ein zusätzliches Feld Date time.Time.
+
+Dann kannst du die SQL-Vorbereitung direkt aus den validierten Daten machen, ohne das Datum nochmal zu parsen.
+
+Praktische Empfehlung
+Wenn du die Tabelle selbst anlegst, nenne die Score-Spalten z. B. score1 bis score18. Das hält den Insert-Code klar und 
+die Auswertung später wird einfacher. Falls du magst, kann ich dir im nächsten Schritt den kompletten Code für:
+
+objects.SqlData
+
+neues Package sqldata
+
+DB-Initialisierung
+
+CREATE TABLE-Statement
+
+direkt passend zu deinem Projekt zusammenbauen.
