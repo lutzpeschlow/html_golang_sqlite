@@ -8,9 +8,12 @@ import (
 	"runtime"
 	"time"
 
+	_ "github.com/mattn/go-sqlite3"
+
 	"github.com/lutzpeschlow/html_golang_sqlite/objects"
 	"github.com/lutzpeschlow/html_golang_sqlite/process_data"
 	"github.com/lutzpeschlow/html_golang_sqlite/read_data"
+	"github.com/lutzpeschlow/html_golang_sqlite/sql_data"
 )
 
 // ======================================================================================
@@ -61,12 +64,31 @@ func main() {
 		if status > 0 {
 			fmt.Println("ERROR: no valid input ...")
 		}
-		objects.GetDebugPrintoutInput(&input)
+		objects.DebugPrintout(input)
 		// transfer to sql object
 		status = sql_data.PrepareSQLData(&input, &sql)
-		objects.GetDebugPrintoutSql(&sql)
+		objects.DebugPrintout(sql)
 		// fill template with numbers
 		_ = tpl.Execute(w, input)
+
+		db, err := sql_data.CreateDB("./data.sqlite")
+		if err != nil {
+			fmt.Println("DB error:", err)
+			return
+		}
+		defer db.Close()
+
+		if err := sql_data.InitSchema(db); err != nil {
+			fmt.Println("schema error:", err)
+			return
+		}
+
+		id, err := sql_data.InsertSQLData(db, sql)
+		if err != nil {
+			fmt.Println("insert error:", err)
+			return
+		}
+		fmt.Println("Inserted ID:", id)
 	})
 	// adress of server
 	fmt.Println("Server: http://localhost:8080")
@@ -80,6 +102,7 @@ func main() {
 	}()
 	// webserver start at port 8080
 	_ = http.ListenAndServe(":8080", nil)
+
 }
 
 // status := process_data.ProcessInputData(&input)

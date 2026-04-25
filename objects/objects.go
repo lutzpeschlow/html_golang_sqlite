@@ -2,6 +2,7 @@ package objects
 
 import (
 	"fmt"
+	"reflect"
 	"time"
 )
 
@@ -45,12 +46,23 @@ type SqlData struct {
 	CreatedAt time.Time
 }
 
-func GetDebugPrintoutInput(obj *InputData) {
-	fmt.Println("debug printout of InputData:")
-	fmt.Printf("%+v\n", obj)
-}
-
-func GetDebugPrintoutSql(obj *SqlData) {
-	fmt.Println("debug printout of SqlData:")
-	fmt.Printf("%+v\n", obj)
+// ======================================================================================
+//
+//	DebugPrintout
+//
+// debug printout of object with all details
+//
+// ======================================================================================
+func DebugPrintout(obj interface{}) {
+	t := reflect.TypeOf(obj)
+	v := reflect.ValueOf(obj)
+	fmt.Printf("%s: \n", t.Name())
+	for i := 0; i < t.NumField(); i++ {
+		field := t.Field(i)
+		value := v.Field(i)
+		if !field.IsExported() || (value.IsZero() && value.Kind() != reflect.String) {
+			continue
+		}
+		fmt.Printf("  %s: %v\n", field.Name, value.Interface())
+	}
 }

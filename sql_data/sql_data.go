@@ -1,14 +1,16 @@
-package sqldata
+package sql_data
 
 import (
 	"database/sql"
 	"fmt"
 	"time"
 
+	_ "github.com/mattn/go-sqlite3"
+
 	"github.com/lutzpeschlow/html_golang_sqlite/objects"
 )
 
-func PrepareSQLData(in *objects.InputData, sql objects.SqlData) int {
+func PrepareSQLData(in *objects.InputData, sql *objects.SqlData) int {
 	status := 0
 	sql.Date = in.Date
 	sql.Option2 = in.Option2
@@ -36,6 +38,53 @@ func PrepareSQLData(in *objects.InputData, sql objects.SqlData) int {
 	sql.Score18 = in.Scores[17]
 	sql.CreatedAt = time.Now()
 	return status
+}
+
+func CreateDB(path string) (*sql.DB, error) {
+	db, err := sql.Open("sqlite3", path)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := db.Ping(); err != nil {
+		db.Close()
+		return nil, err
+	}
+
+	return db, nil
+}
+
+func InitSchema(db *sql.DB) error {
+	stmt := `
+	CREATE TABLE IF NOT EXISTS rounds (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		date TEXT,
+		option2 TEXT,
+		option3 TEXT,
+		option4 TEXT,
+		option5 TEXT,
+		score1 INTEGER,
+		score2 INTEGER,
+		score3 INTEGER,
+		score4 INTEGER,
+		score5 INTEGER,
+		score6 INTEGER,
+		score7 INTEGER,
+		score8 INTEGER,
+		score9 INTEGER,
+		score10 INTEGER,
+		score11 INTEGER,
+		score12 INTEGER,
+		score13 INTEGER,
+		score14 INTEGER,
+		score15 INTEGER,
+		score16 INTEGER,
+		score17 INTEGER,
+		score18 INTEGER,
+		created_at TEXT
+	);`
+	_, err := db.Exec(stmt)
+	return err
 }
 
 func InsertSQLData(db *sql.DB, s objects.SqlData) (int64, error) {
