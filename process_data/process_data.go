@@ -39,6 +39,7 @@ func ProcessInputData(obj *objects.InputData) int {
 	t, err := parseGermanDate(obj.Option1)
 	if err != nil {
 		fmt.Println("ERROR: Date is not valid, please correct ...")
+		obj.Error = "Date is not valid"
 		return 1
 	}
 	fmt.Println("processing date: ", t)
@@ -55,11 +56,13 @@ func ProcessInputData(obj *objects.InputData) int {
 	obj.Option5 = strings.ToUpper(strings.TrimSpace(obj.Option5))
 	// (2) Scores
 	num_holes := countNonZero(obj.Scores)
+	fmt.Println("non-zero holes: ", num_holes)
 	if num_holes != 9 && num_holes != 18 {
 		fmt.Println("ERROR: number of holes should be 9 or 18 ...")
+		obj.Error = "Number of holes not valid"
 		return 1
 	}
-	fmt.Println("finealized processing ...")
+	fmt.Println("finelized processing ...")
 	// return value
 	return 0
 

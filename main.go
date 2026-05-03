@@ -64,6 +64,9 @@ func main() {
 		fmt.Println("in main after processing ...")
 		if status > 0 {
 			fmt.Println("ERROR: no valid input ...")
+			input.Error = "Invalid input data"
+			_ = tpl.Execute(w, input)
+			return
 		}
 		objects.DebugPrintout(input)
 		// transfer to sql object
