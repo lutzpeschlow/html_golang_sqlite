@@ -34,7 +34,8 @@ func main() {
 	// (1) load html template from index.html
 	// read the file with parsefiles and create a template object
 	// must valid template
-	tpl := template.Must(template.ParseFiles("templates/index.html"))
+	tpl := template.Must(template.ParseFiles("templates/index.html", "templates/content.html"))
+
 	// register a route
 	// with / start function, w is the response, r is the request from browser
 	// anonymous function, will defined directly
@@ -90,6 +91,13 @@ func main() {
 		}
 		fmt.Println("Inserted ID:", id)
 	})
+
+	http.HandleFunc("/content", func(w http.ResponseWriter, r *http.Request) {
+		tpl.ExecuteTemplate(w, "content.html", nil)
+	})
+	//	data := struct{ Text string }{Text: "Dein dynamischer Text"}
+	// tpl.ExecuteTemplate(w, "content.html", data)
+
 	// adress of server
 	fmt.Println("Server: http://localhost:8080")
 	fmt.Println("Browser...")
