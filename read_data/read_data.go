@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/lutzpeschlow/html_golang_sqlite/objects"
+	"github.com/lutzpeschlow/html_golang_sqlite/sql_data"
 )
 
 // ======================================================================================
@@ -46,4 +47,31 @@ func ReadInput(input *objects.InputData, r *http.Request, w http.ResponseWriter,
 		input.Scores[i-1] = n
 	}
 	return nil
+}
+
+func UpdateContentHTML(w http.ResponseWriter, tpl *template.Template, dbPath string) error {
+	// Datenbank öffnen
+	db, err := sql_data.CreateDB(dbPath)
+	if err != nil {
+		return fmt.Errorf("could not open database: %w", err)
+	}
+	defer db.Close()
+
+	count, err := sql_data.GetRoundCount(db)
+	if err != nil {
+		return fmt.Errorf("could not get count: %w", err)
+	}
+	dates, err := sql_data.GetAllDates(db)
+	if err != nil {
+		return fmt.Errorf("could not get dates: %w", err)
+	}
+	fmt.Println(dates)
+
+	content := objects.SqlContent{
+		Count: count,
+		Dates: dates,
+	}
+
+	// Template mit den Daten rendern
+	return tpl.ExecuteTemplate(w, "content.html", content)
 }

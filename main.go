@@ -94,13 +94,17 @@ func main() {
 		}
 		fmt.Println("Inserted ID:", id)
 	})
-
+	// content handler
+	//     read sql and deliver content
 	http.HandleFunc("/content", func(w http.ResponseWriter, r *http.Request) {
-		tpl.ExecuteTemplate(w, "content.html", nil)
+		// path of database
+		err := read_data.UpdateContentHTML(w, tpl, "./data.sqlite")
+		if err != nil {
+			fmt.Println("Error loading content:", err)
+			// Fallback: content.html without any data
+			tpl.ExecuteTemplate(w, "content.html", nil)
+		}
 	})
-	//	data := struct{ Text string }{Text: "Dein dynamischer Text"}
-	// tpl.ExecuteTemplate(w, "content.html", data)
-
 	// adress of server
 	fmt.Println("Server: http://localhost:8080")
 	fmt.Println("Browser...")
@@ -115,20 +119,6 @@ func main() {
 	_ = http.ListenAndServe(":8080", nil)
 
 }
-
-// status := process_data.ProcessInputData(&input)
-// if status > 0 {
-// 	fmt.Println("ERROR: no valid input ...")
-// 	return
-// }
-//
-// sqlObj := sqldata.PrepareSQLData(&input, parsedDate)
-// id, err := sqldata.InsertSQLData(db, sqlObj)
-// if err != nil {
-// 	fmt.Println("DB error:", err)
-// 	return
-// }
-// fmt.Println("Inserted ID:", id)
 
 // ======================================================================================
 //

@@ -18,6 +18,11 @@ type InputData struct {
 	Error   string
 }
 
+type SqlContent struct {
+	Count int64
+	Dates []string
+}
+
 type SqlData struct {
 	ID        int64
 	Date      time.Time

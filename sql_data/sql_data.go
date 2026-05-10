@@ -40,6 +40,13 @@ func PrepareSQLData(in *objects.InputData, sql *objects.SqlData) int {
 	return status
 }
 
+// ======================================================================================
+//
+//		CreateDB
+//
+//	 create sqlite database
+//
+// ======================================================================================
 func CreateDB(path string) (*sql.DB, error) {
 	db, err := sql.Open("sqlite3", path)
 	if err != nil {
@@ -54,6 +61,14 @@ func CreateDB(path string) (*sql.DB, error) {
 	return db, nil
 }
 
+// ======================================================================================
+//
+//	  InitSchema
+//
+//		initialize database schema
+//		the schema differs a little bit against object content
+//
+// ======================================================================================
 func InitSchema(db *sql.DB) error {
 	stmt := `
 	CREATE TABLE IF NOT EXISTS rounds (
@@ -87,6 +102,13 @@ func InitSchema(db *sql.DB) error {
 	return err
 }
 
+// ======================================================================================
+//
+//	  InsertSQLData
+//
+//		insert sql data
+//
+// ======================================================================================
 func InsertSQLData(db *sql.DB, s objects.SqlData) (int64, error) {
 	query := `
 		INSERT INTO rounds (
@@ -111,4 +133,46 @@ func InsertSQLData(db *sql.DB, s objects.SqlData) (int64, error) {
 		return 0, fmt.Errorf("insert sql data: %w", err)
 	}
 	return res.LastInsertId()
+}
+
+// ======================================================================================
+//
+//	  GetRoundCount
+//
+//		read number of rounds from database
+//
+// ======================================================================================
+func GetRoundCount(db *sql.DB) (int64, error) {
+	var count int64
+	query := `SELECT COUNT(*) FROM rounds`
+	err := db.QueryRow(query).Scan(&count)
+	fmt.Println("counted from sql: ", count)
+	if err != nil {
+		return 0, fmt.Errorf("get round count: %w", err)
+	}
+	return count, nil
+}
+
+func GetAllDates(db *sql.DB) ([]string, error) {
+	query := `SELECT date FROM rounds ORDER BY date DESC`
+	rows, err := db.Query(query)
+	if err != nil {
+		return nil, fmt.Errorf("get all dates: %w", err)
+	}
+	defer rows.Close()
+
+	var dates []string
+	for rows.Next() {
+		var dateStr string
+		if err := rows.Scan(&dateStr); err != nil {
+			return nil, fmt.Errorf("scan date: %w", err)
+		}
+		dates = append(dates, dateStr)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows iteration: %w", err)
+	}
+
+	return dates, nil
 }
