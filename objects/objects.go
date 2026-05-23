@@ -6,6 +6,10 @@ import (
 	"time"
 )
 
+type Control struct {
+	Enable map[string]bool `json:"enable"`
+}
+
 type InputData struct {
 	Date    time.Time
 	Option1 string

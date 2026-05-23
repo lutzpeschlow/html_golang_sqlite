@@ -8,6 +8,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 
 	"github.com/lutzpeschlow/html_golang_sqlite/objects"
+	//"github.com/lutzpeschlow/html_golang_sqlite/sql_data"
 )
 
 func PrepareSQLData(in *objects.InputData, sql *objects.SqlData) int {
@@ -175,4 +176,28 @@ func GetAllDates(db *sql.DB) ([]string, error) {
 	}
 
 	return dates, nil
+}
+
+func GetContent(dbPath string) error {
+	// Datenbank öffnen
+	db, err := CreateDB(dbPath)
+	if err != nil {
+		return fmt.Errorf("could not open database: %w", err)
+	}
+	defer db.Close()
+
+	count, err := GetRoundCount(db)
+	if err != nil {
+		return fmt.Errorf("could not get count: %w", err)
+	}
+	dates, err := GetAllDates(db)
+	if err != nil {
+		return fmt.Errorf("could not get dates: %w", err)
+	}
+	fmt.Println(dates, count)
+
+	// content := objects.SqlContent{
+	// 	Count: count,
+	// 	Dates: dates,
+	return nil
 }

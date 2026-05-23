@@ -1,0 +1,8 @@
+{
+    "enable": {
+      "WRITE": true,
+      "READ": false,
+      "STATS": false
+    }
+}
+  

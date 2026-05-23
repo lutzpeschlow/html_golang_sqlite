@@ -1,2 +1,2 @@
 
-more ../main.go ../*/*.go ../*/*.html > ../all.txt
+more ../control.json ../main.go ../*/*.go ../*/*.html > ../all.txt

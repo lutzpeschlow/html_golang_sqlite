@@ -10,6 +10,7 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 
+	"github.com/lutzpeschlow/html_golang_sqlite/ctrl"
 	"github.com/lutzpeschlow/html_golang_sqlite/objects"
 	"github.com/lutzpeschlow/html_golang_sqlite/process_data"
 	"github.com/lutzpeschlow/html_golang_sqlite/read_data"
@@ -31,10 +32,16 @@ import (
 //
 // ======================================================================================
 func main() {
+	var control objects.Control
+	if err := ctrl.ReadControlJsonFile("control.json", &control); err != nil {
+		fmt.Println("control error:", err)
+		return
+	}
+	ctrl.PrintEnabled(&control)
 	// (1) load html template from index.html
 	// read the file with parsefiles and create a template object
 	// must valid template
-	tpl := template.Must(template.ParseFiles("templates/index.html", "templates/content.html"))
+	tpl := template.Must(template.ParseFiles("templates/index.html"))
 
 	// register a route
 	// with / start function, w is the response, r is the request from browser
@@ -94,17 +101,6 @@ func main() {
 		}
 		fmt.Println("Inserted ID:", id)
 	})
-	// content handler
-	//     read sql and deliver content
-	http.HandleFunc("/content", func(w http.ResponseWriter, r *http.Request) {
-		// path of database
-		err := read_data.UpdateContentHTML(w, tpl, "./data.sqlite")
-		if err != nil {
-			fmt.Println("Error loading content:", err)
-			// Fallback: content.html without any data
-			tpl.ExecuteTemplate(w, "content.html", nil)
-		}
-	})
 	// adress of server
 	fmt.Println("Server: http://localhost:8080")
 	fmt.Println("Browser...")
@@ -113,7 +109,10 @@ func main() {
 	// wait for three seconds, time for webserver before opening browser with adress
 	go func() {
 		time.Sleep(3 * time.Second)
-		openBrowser("http://localhost:8080")
+
+		if err := openBrowser("http://localhost:8080"); err != nil {
+			fmt.Println("  browser error: ", err)
+		}
 	}()
 	// webserver start at port 8080
 	_ = http.ListenAndServe(":8080", nil)
@@ -130,7 +129,7 @@ func main() {
 func openBrowser(url string) error {
 	switch runtime.GOOS {
 	case "linux":
-		return exec.Command("vivaldi-stable", url).Start()
+		return exec.Command("vivaldi-stable", "--new-tab", url).Start()
 	case "windows":
 		return exec.Command("cmd", "/c", "start", "msedge", url).Start()
 	default:

@@ -33,9 +33,41 @@ import (
 func ProcessInputData(obj *objects.InputData) int {
 	fmt.Println("...")
 	fmt.Println("data processing ...")
+
+	// check on keyword mode
+	keyword := strings.ToUpper(strings.TrimSpace(obj.Option1))
+	keywords := []string{"CONTENT", "TEST", "HELP", "STATS"}
+	// valid keyword - check in string slice
+	isKeyword := false
+	for _, kw := range keywords {
+		if keyword == kw {
+			isKeyword = true
+			break
+		}
+	}
+	// keyword valid - execute according function
+	if isKeyword {
+		switch keyword {
+		case "CONTENT":
+			fmt.Println("CONTENT Keyword erkannt")
+			return ProcessContent(obj)
+		case "TEST":
+			fmt.Println("TEST Keyword erkannt")
+			return ProcessTest(obj)
+		case "HELP":
+			fmt.Println("HELP Keyword erkannt")
+			return ProcessHelp(obj)
+		case "STATS":
+			fmt.Println("STATS Keyword erkannt")
+			return ProcessStats(obj)
+		}
+	}
+
 	// (1) options
-	// (1.1) date
-	fmt.Println(obj.Option1)
+	// (1.1) date or option
+	//       possible options:
+	//           CONTENT
+	fmt.Println("date parsing: ", obj.Option1)
 	t, err := parseGermanDate(obj.Option1)
 	if err != nil {
 		fmt.Println("ERROR: Date is not valid, please correct ...")
@@ -66,6 +98,29 @@ func ProcessInputData(obj *objects.InputData) int {
 	// return value
 	return 0
 
+}
+
+func ProcessHelp(obj *objects.InputData) int {
+	obj.Result = "Verfügbare Keywords: CONTENT, TEST, HELP, STATS"
+	obj.Error = ""
+	return 0
+}
+
+func ProcessStats(obj *objects.InputData) int {
+	obj.Result = "Statistik wird berechnet..."
+	// Hier Statistik-Logik
+	return 0
+}
+func ProcessContent(obj *objects.InputData) int {
+	obj.Result = "Verfügbare Keywords: CONTENT, TEST, HELP, STATS"
+	obj.Error = ""
+	return 0
+}
+
+func ProcessTest(obj *objects.InputData) int {
+	obj.Result = "Statistik wird berechnet..."
+	// Hier Statistik-Logik
+	return 0
 }
 
 // ======================================================================================
