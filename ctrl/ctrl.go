@@ -31,3 +31,12 @@ func PrintEnabled(obj *objects.Control) {
 		}
 	}
 }
+
+func GetEnabled(obj *objects.Control) string {
+	for name, enabled := range obj.Enable {
+		if enabled {
+			return name
+		}
+	}
+	return "NONE"
+}

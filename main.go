@@ -38,6 +38,10 @@ func main() {
 		return
 	}
 	ctrl.PrintEnabled(&control)
+	var enabled string
+	enabled = ctrl.GetEnabled(&control)
+	fmt.Println(enabled)
+
 	// (1) load html template from index.html
 	// read the file with parsefiles and create a template object
 	// must valid template
