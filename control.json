@@ -1,7 +1,7 @@
 {
     "enable": {
-      "WRITE": true,
-      "READ": false,
+      "WRITE": false,
+      "READ": true,
       "STATS": false
     }
 }

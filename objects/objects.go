@@ -6,10 +6,12 @@ import (
 	"time"
 )
 
+// store enabled action
 type Control struct {
 	Enable map[string]bool `json:"enable"`
 }
 
+// store input from html
 type InputData struct {
 	Date    time.Time
 	Option1 string
@@ -22,11 +24,7 @@ type InputData struct {
 	Error   string
 }
 
-type SqlContent struct {
-	Count int64
-	Dates []string
-}
-
+// store prepared sql data
 type SqlData struct {
 	ID        int64
 	Date      time.Time
@@ -53,6 +51,13 @@ type SqlData struct {
 	Score17   int
 	Score18   int
 	CreatedAt time.Time
+}
+
+// content of sql
+type SqlContent struct {
+	DbPath string
+	Count  int64
+	Dates  []string
 }
 
 // ======================================================================================
