@@ -26,11 +26,11 @@ func main() {
 		fmt.Println("control error:", err)
 		return
 	}
-	// (2) dispatcher spreads further actions
+	// (2) dispatcher spreads further actions defined in json file
 	// - WRITE
 	// - READ
 	enabled = ctrl.GetEnabled(&control)
-	fmt.Println(enabled)
+	fmt.Println("enabled action: ", enabled)
 	dispatcher.ExecuteAction(&control)
 
 }

@@ -94,7 +94,7 @@ func ProcessInputData(obj *objects.InputData) int {
 		obj.Error = "Number of holes not valid"
 		return 1
 	}
-	fmt.Println("finelized processing ...")
+	fmt.Println("finalized processing ...")
 	// return value
 	return 0
 
