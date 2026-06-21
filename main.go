@@ -20,7 +20,6 @@ import (
 // ======================================================================================
 func main() {
 	var control objects.Control
-	var enabled string
 	// (1) read control json file
 	if err := ctrl.ReadControlJsonFile("control.json", &control); err != nil {
 		fmt.Println("control error:", err)
@@ -29,8 +28,7 @@ func main() {
 	// (2) dispatcher spreads further actions defined in json file
 	// - WRITE
 	// - READ
-	enabled = ctrl.GetEnabled(&control)
-	fmt.Println("enabled action: ", enabled)
+	ctrl.GetEnabled(&control)
 	dispatcher.ExecuteAction(&control)
 
 }

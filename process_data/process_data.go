@@ -31,37 +31,7 @@ import (
 //
 // ======================================================================================
 func ProcessInputData(obj *objects.InputData) int {
-	fmt.Println("...")
 	fmt.Println("data processing ...")
-
-	// check on keyword mode
-	keyword := strings.ToUpper(strings.TrimSpace(obj.Option1))
-	keywords := []string{"CONTENT", "TEST", "HELP", "STATS"}
-	// valid keyword - check in string slice
-	isKeyword := false
-	for _, kw := range keywords {
-		if keyword == kw {
-			isKeyword = true
-			break
-		}
-	}
-	// keyword valid - execute according function
-	if isKeyword {
-		switch keyword {
-		case "CONTENT":
-			fmt.Println("CONTENT Keyword erkannt")
-			return ProcessContent(obj)
-		case "TEST":
-			fmt.Println("TEST Keyword erkannt")
-			return ProcessTest(obj)
-		case "HELP":
-			fmt.Println("HELP Keyword erkannt")
-			return ProcessHelp(obj)
-		case "STATS":
-			fmt.Println("STATS Keyword erkannt")
-			return ProcessStats(obj)
-		}
-	}
 
 	// (1) options
 	// (1.1) date or option
@@ -100,29 +70,6 @@ func ProcessInputData(obj *objects.InputData) int {
 
 }
 
-func ProcessHelp(obj *objects.InputData) int {
-	obj.Result = "Verfügbare Keywords: CONTENT, TEST, HELP, STATS"
-	obj.Error = ""
-	return 0
-}
-
-func ProcessStats(obj *objects.InputData) int {
-	obj.Result = "Statistik wird berechnet..."
-	// Hier Statistik-Logik
-	return 0
-}
-func ProcessContent(obj *objects.InputData) int {
-	obj.Result = "Verfügbare Keywords: CONTENT, TEST, HELP, STATS"
-	obj.Error = ""
-	return 0
-}
-
-func ProcessTest(obj *objects.InputData) int {
-	obj.Result = "Statistik wird berechnet..."
-	// Hier Statistik-Logik
-	return 0
-}
-
 // ======================================================================================
 //
 // parseGermanDate
@@ -154,7 +101,8 @@ func parseGermanDate(s string) (time.Time, error) {
 //
 // countNonZero
 //
-// the array of
+// input: array of integer
+// output: count of zero values
 //
 // ======================================================================================
 func countNonZero(scores [18]int) int {

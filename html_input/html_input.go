@@ -28,7 +28,7 @@ import (
 // - (8) starts webserver, block main thread
 //
 // ======================================================================================
-func HtmlInput() error {
+func HtmlInput(dbPath string) error {
 	// (1) load html template from index.html
 	// read the file with parsefiles and create a template object
 	// must valid template
@@ -72,7 +72,7 @@ func HtmlInput() error {
 		// fill template with numbers
 		_ = tpl.Execute(w, input)
 
-		db, err := sql_data.CreateDB("./data.sqlite")
+		db, err := sql_data.CreateDB(dbPath)
 		if err != nil {
 			fmt.Println("DB error:", err)
 			return

@@ -19,13 +19,16 @@ func ExecuteAction(c *objects.Control) error {
 	switch enabled {
 	case "WRITE":
 		fmt.Println("write is on, open html file for input data into database")
-		status := html_input.HtmlInput()
+		status := html_input.HtmlInput(c.DbPath)
 		if status != nil {
 			fmt.Println("error")
 		}
 	case "READ":
 		fmt.Println("read is on, use get content function to read database")
-		sql_data.GetContent("./data.sqlite")
+		sql_data.GetContent(c.DbPath)
+		// case "STATS":
+		// 	fmt.Println("stats is on")
+		//	sql_data.GetStats(c.dbPath)
 	}
 
 	return nil

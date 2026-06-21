@@ -1,8 +1,9 @@
 {
     "enable": {
-      "WRITE": false,
-      "READ": true,
+      "WRITE": true,
+      "READ": false,
       "STATS": false
-    }
+    },
+    "dbpath": "data.sqlite"
 }
   

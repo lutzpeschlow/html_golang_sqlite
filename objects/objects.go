@@ -6,9 +6,10 @@ import (
 	"time"
 )
 
-// store enabled action
+// store enabled action and further data in control object
 type Control struct {
 	Enable map[string]bool `json:"enable"`
+	DbPath string          `json:"dbpath"`
 }
 
 // store input from html
@@ -59,6 +60,8 @@ type SqlContent struct {
 	Count  int64
 	Dates  []string
 }
+
+// stats of sql
 
 // ======================================================================================
 //

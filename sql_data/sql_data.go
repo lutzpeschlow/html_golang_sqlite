@@ -197,6 +197,7 @@ func GetContent(dbPath string) error {
 	fmt.Println(dates, count)
 
 	// content := objects.SqlContent{
+	//  DbPath: dbPath,
 	// 	Count: count,
 	// 	Dates: dates,
 	return nil
