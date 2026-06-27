@@ -138,22 +138,28 @@ func InsertSQLData(db *sql.DB, s objects.SqlData) (int64, error) {
 
 // ======================================================================================
 //
-//	  GetRoundCount
+// GetRoundCount
 //
-//		read number of rounds from database
+//	read number of rounds from database
 //
 // ======================================================================================
 func GetRoundCount(db *sql.DB) (int64, error) {
 	var count int64
 	query := `SELECT COUNT(*) FROM rounds`
 	err := db.QueryRow(query).Scan(&count)
-	fmt.Println("counted from sql: ", count)
 	if err != nil {
 		return 0, fmt.Errorf("get round count: %w", err)
 	}
 	return count, nil
 }
 
+// ======================================================================================
+//
+// GetAllDates
+//
+//	dates from database as field
+//
+// ======================================================================================
 func GetAllDates(db *sql.DB) ([]string, error) {
 	query := `SELECT date FROM rounds ORDER BY date DESC`
 	rows, err := db.Query(query)
@@ -178,27 +184,80 @@ func GetAllDates(db *sql.DB) ([]string, error) {
 	return dates, nil
 }
 
-func GetContent(dbPath string) error {
-	// Datenbank öffnen
+// ======================================================================================
+//
+// GetContentCommon
+//
+//	several statistics in database
+//
+// ======================================================================================
+func GetContentCommon(dbPath string) error {
+	// open database
 	db, err := CreateDB(dbPath)
 	if err != nil {
 		return fmt.Errorf("could not open database: %w", err)
 	}
 	defer db.Close()
-
+	// count rounds
 	count, err := GetRoundCount(db)
 	if err != nil {
 		return fmt.Errorf("could not get count: %w", err)
 	}
-	dates, err := GetAllDates(db)
+	fmt.Println("Number of Rounds: ", count)
+	// min and max date
+	minDate, maxDate, err := GetMinMaxDates(dbPath)
 	if err != nil {
-		return fmt.Errorf("could not get dates: %w", err)
+		return fmt.Errorf("could not get min/max dates: %w", err)
 	}
-	fmt.Println(dates, count)
-
-	// content := objects.SqlContent{
-	//  DbPath: dbPath,
-	// 	Count: count,
-	// 	Dates: dates,
+	fmt.Println("First date:", minDate)
+	fmt.Println("Last date:", maxDate)
+	// return value
 	return nil
+}
+
+// ======================================================================================
+//
+// GetNumEntries
+//
+//	read number of entries/rounds from database
+//
+// ======================================================================================
+func GetNumEntries(dbPath string) error {
+	// open database
+	db, err := CreateDB(dbPath)
+	if err != nil {
+		return fmt.Errorf("could not open database: %w", err)
+	}
+	defer db.Close()
+	// count rounds
+	count, err := GetRoundCount(db)
+	if err != nil {
+		return fmt.Errorf("could not get count: %w", err)
+	}
+	fmt.Println("Number of Entries: ", count)
+	// return value
+	return nil
+}
+
+// ======================================================================================
+//
+// GetMinMaxDates
+//
+//	min and max date in database
+//
+// ======================================================================================
+
+func GetMinMaxDates(dbPath string) (string, string, error) {
+	db, err := CreateDB(dbPath)
+	if err != nil {
+		return "", "", fmt.Errorf("could not open database: %w", err)
+	}
+	defer db.Close()
+	var minDate, maxDate string
+	query := `SELECT MIN(date), MAX(date) FROM rounds`
+	err = db.QueryRow(query).Scan(&minDate, &maxDate)
+	if err != nil {
+		return "", "", fmt.Errorf("query min/max date: %w", err)
+	}
+	return minDate, maxDate, nil
 }

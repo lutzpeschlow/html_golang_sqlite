@@ -6,10 +6,23 @@ import (
 	"time"
 )
 
-// store enabled action and further data in control object
+// Control stores the control file content.
 type Control struct {
-	Enable map[string]bool `json:"enable"`
-	DbPath string          `json:"dbpath"`
+	Enable EnableConfig `json:"enable"`
+	DbPath string       `json:"dbpath"`
+}
+
+// EnableConfig stores the main enable switches.
+type EnableConfig struct {
+	WRITE       bool        `json:"WRITE"`
+	READ        bool        `json:"READ"`
+	READOptions ReadOptions `json:"READ_OPTIONS"`
+}
+
+// ReadOptions stores sub-options for READ.
+type ReadOptions struct {
+	COMMON     bool `json:"COMMON"`
+	NumEntries bool `json:"NUM_ENTRIES"`
 }
 
 // store input from html

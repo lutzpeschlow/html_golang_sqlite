@@ -1,7 +1,11 @@
 {
     "enable": {
-      "WRITE": true,
-      "READ": false,
+      "WRITE": false,
+      "READ": true,
+      "READ_OPTIONS": {
+        "COMMON": true,
+        "NUM_ENTRIES": false
+      },
       "STATS": false
     },
     "dbpath": "data.sqlite"

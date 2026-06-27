@@ -28,7 +28,6 @@ func main() {
 	// (2) dispatcher spreads further actions defined in json file
 	// - WRITE
 	// - READ
-	ctrl.GetEnabled(&control)
 	dispatcher.ExecuteAction(&control)
 
 }

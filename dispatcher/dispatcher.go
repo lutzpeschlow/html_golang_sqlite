@@ -25,10 +25,26 @@ func ExecuteAction(c *objects.Control) error {
 		}
 	case "READ":
 		fmt.Println("read is on, use get content function to read database")
-		sql_data.GetContent(c.DbPath)
-		// case "STATS":
-		// 	fmt.Println("stats is on")
-		//	sql_data.GetStats(c.dbPath)
+		switch {
+		case c.Enable.READOptions.COMMON:
+			fmt.Println("READ option COMMON is on")
+			if err := sql_data.GetContentCommon(c.DbPath); err != nil {
+				fmt.Println("error:", err)
+				return err
+			}
+
+		case c.Enable.READOptions.NumEntries:
+			fmt.Println("READ option NUM_ENTRIES is on")
+			if err := sql_data.GetNumEntries(c.DbPath); err != nil {
+				fmt.Println("error:", err)
+				return err
+			}
+
+		default:
+			fmt.Println("no READ option enabled")
+		}
+	default:
+		fmt.Println("no action enabled")
 	}
 
 	return nil

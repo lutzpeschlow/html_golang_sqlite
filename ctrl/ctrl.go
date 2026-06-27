@@ -23,20 +23,40 @@ func ReadControlJsonFile(path string, obj *objects.Control) error {
 	return nil
 }
 
-func PrintEnabled(obj *objects.Control) {
-	fmt.Println("enabled actions:")
-	for name, enabled := range obj.Enable {
-		if enabled {
-			fmt.Println(" -", name)
-		}
+// ======================================================================================
+//
+// # GetEnabled
+//
+// check out main enablement
+// READ or WRITE
+//
+// ======================================================================================
+func GetEnabled(obj *objects.Control) string {
+	if obj.Enable.WRITE {
+		return "WRITE"
 	}
+	if obj.Enable.READ {
+		return "READ"
+	}
+	return "NONE"
 }
 
-func GetEnabled(obj *objects.Control) string {
-	for name, enabled := range obj.Enable {
-		if enabled {
-			return name
-		}
+// ======================================================================================
+//
+// # GetReadOption
+//
+// check out secondary enablement for READ
+// - COMMON
+// - NUM_ENTRIES
+//
+// ======================================================================================
+
+func GetReadOption(obj *objects.Control) string {
+	if obj.Enable.READOptions.COMMON {
+		return "COMMON"
+	}
+	if obj.Enable.READOptions.NumEntries {
+		return "NUM_ENTRIES"
 	}
 	return "NONE"
 }
